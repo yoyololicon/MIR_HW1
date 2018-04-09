@@ -18,41 +18,44 @@ key_map = dict(zip(range(24), key))
 
 # Copy from example code
 # Generate major scale templates
-major_template = np.array([[1,0,1,0,1,1,0,1,0,1,0,1]])/np.sqrt(7.0)
+major_template = np.array([[1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]]) / np.sqrt(7.0)
 # Generate minor scale templates
-minor_template = np.array([[1,0,1,1,0,1,0,1,1,0,1,0]])/np.sqrt(7.0)
+minor_template = np.array([[1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0]]) / np.sqrt(7.0)
 
-#move the tonic to A, not C
-minor_template, major_template = np.roll(major_template, -3), np.roll(minor_template, -3)
+# move the tonic to A, not C
+#minor_template, major_template = np.roll(major_template, -3), np.roll(minor_template, -3)
 template = major_template
 for i in range(11):
-    template = np.append(template, np.roll(major_template, i+1), axis=0)
+    template = np.append(template, np.roll(major_template, i + 1), axis=0)
 for i in range(12):
     template = np.append(template, np.roll(minor_template, i), axis=0)
-    
+
+
 def simple_evaluate(y, t):
     if y == t:
         return 1
     else:
         print("Wrong: ", key_map[t], "is not", key_map[y])
         return 0
-    
+
+
 def mirex_evaluate(y, t):
-    minory, yy = divmod(y, 12)
-    minort, tt = divmod(t, 12)
+    minory = y // 12
+    minort = t // 12
     if y == t:
         return 1
-    elif minort == minory and (tt+7)%12 == yy:  #perfect fifth
+    elif minort == minory and (t + 7) % 12 == y % 12:  # perfect fifth
         return 0.5
-    elif minory > minort and (yy+3)%12 == tt: #relative minor
+    elif minory > minort and (y + 3) % 12 == t % 12:  # relative minor
         return 0.3
-    elif minory < minort and (tt+3)%12 == yy:   #relative major
+    elif minory < minort and (t + 3) % 12 == y % 12:  # relative major
         return 0.3
-    elif minort != minory and tt == yy:     #paralle
+    elif minort != minory and t % 12 == y % 12:  # parallel
         return 0.2
     else:
         print("Wrong: ", key_map[t], "is not", key_map[y])
         return 0
+
 
 if __name__ == '__main__':
     g = 100
@@ -71,20 +74,21 @@ if __name__ == '__main__':
                 if t < 0:
                     continue
                 count += 1
-                data, sr = load(os.path.join(adir, f + audio_ext))
-                chroma = chroma_stft(y=data, sr=sr)
-                chroma = np.log(1 + g*np.abs(chroma))
+                data, sr = load(os.path.join(adir, f + audio_ext), sr=None)
+                chroma = chroma_stft(y=data, sr=sr, n_fft=4096, base_c=False, norm=None)
+                chroma = np.log(1 + g * np.abs(chroma))
                 chroma = np.sum(chroma, axis=1)
-                tonic = np.argmax(np.roll(chroma, 3))
+                tonic = np.argmax(chroma)
 
                 corr_major = pearsonr(chroma, template[tonic])[0]
-                corr_minor = pearsonr(chroma, template[tonic+12])[0]
+                corr_minor = pearsonr(chroma, template[tonic + 12])[0]
 
                 if corr_major > corr_minor:
                     y = tonic
                 else:
-                    y = tonic+12
+                    y = tonic + 12
 
+                #acc.append(simple_evaluate(y, t))
                 acc.append(mirex_evaluate(y, t))
 
         genre_acc.append(np.mean(acc))
@@ -97,4 +101,3 @@ if __name__ == '__main__':
     plt.xticks(x, test_genres)
     plt.title("Accuracy for each genre")
     plt.show()
-            
