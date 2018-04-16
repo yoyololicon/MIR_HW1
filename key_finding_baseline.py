@@ -41,17 +41,17 @@ def simple_evaluate(y, t):
 
 
 def mirex_evaluate(y, t):
-    minory = y // 12
-    minort = t // 12
+    y_is_minor = y // 12
+    t_is_minor = t // 12
     if y == t:
         return 1
-    elif minort == minory and (t + 7) % 12 == y % 12:  # perfect fifth
+    elif t_is_minor == y_is_minor and (t + 7) % 12 == y % 12:  # perfect fifth
         return 0.5
-    elif minory > minort and (y + 3) % 12 == t % 12:  # relative minor
+    elif y_is_minor > t_is_minor and (y + 3) % 12 == t % 12:  # relative minor
         return 0.3
-    elif minory < minort and (t + 3) % 12 == y % 12:  # relative major
+    elif y_is_minor < t_is_minor and (t + 3) % 12 == y % 12:  # relative major
         return 0.3
-    elif minort != minory and t % 12 == y % 12:  # parallel
+    elif t_is_minor != y_is_minor and t % 12 == y % 12:  # parallel
         return 0.2
     else:
         # print("Wrong: ", key_map[t], "is not", key_map[y])
@@ -63,8 +63,8 @@ if __name__ == '__main__':
     overall_acc = []
     genre_acc = []
 
-    table = PrettyTable(["Genre", "Num of Same", "Num of Perfect Fifth", "Num of Relative Minor/Major",
-                         "Num of Parallel Minor/Major", "Accuracy", "Mirex Accuracy"])
+    table = PrettyTable(["Genre", "Same", "Perfect Fifth", "Relative Minor/Major",
+                         "Parallel Minor/Major", "Accuracy", "MIREX Accuracy"])
 
     for genre in test_genres:
         adir = os.path.join(audio_dir, genre)
@@ -82,9 +82,9 @@ if __name__ == '__main__':
                     continue
                 count += 1
                 data, sr = load(os.path.join(adir, f + audio_ext), sr=None)
-                chroma = chroma_stft(y=data, sr=sr, n_fft=4096, base_c=False, norm=None)
+                chroma = chroma_stft(y=data, sr=sr, n_fft=4096, base_c=False)
+                chroma = np.mean(chroma, axis=1)
                 chroma = np.log(1 + g * chroma)
-                chroma = np.sum(chroma, axis=1)
                 tonic = np.argmax(chroma)
 
                 corr_major = pearsonr(chroma, template[tonic])[0]
@@ -110,8 +110,8 @@ if __name__ == '__main__':
     print(table)
     x = np.arange(len(test_genres))
     genre_acc = np.array(genre_acc)
-    plt.bar(x, genre_acc[:, 1], 1, label="mirex acc", alpha=0.5)
-    plt.bar(x, genre_acc[:, 0], 1, label="acc", alpha=0.5)
+    plt.bar(x, genre_acc[:, 1], 1, label="mirex acc", alpha=0.6)
+    plt.bar(x, genre_acc[:, 0], 1, label="acc", alpha=0.6)
     plt.xticks(x, test_genres)
     plt.title("Accuracy for each genre")
     plt.legend()

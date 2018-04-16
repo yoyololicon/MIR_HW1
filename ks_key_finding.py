@@ -1,6 +1,6 @@
 from librosa import load
 from librosa.feature import chroma_stft
-from key_finding_baseline import audio_dir, audio_ext, label_dir, label_ext, test_genres,  mirex_evaluate
+from key_finding_baseline import audio_dir, audio_ext, label_dir, label_ext, test_genres, mirex_evaluate
 from scipy.stats import pearsonr
 from prettytable import PrettyTable
 import numpy as np
@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 
 major_template = np.array([[6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88]])
 minor_template = np.array([[6.33, 2.68, 3.52, 5.38, 2.6, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17]])
+major_template /= np.sqrt((major_template**2).sum())
+minor_template /= np.sqrt((minor_template**2).sum())
 
 template = major_template
 for i in range(11):
@@ -17,12 +19,12 @@ for i in range(12):
     template = np.append(template, np.roll(minor_template, i), axis=0)
 
 if __name__ == '__main__':
-    g = 1000
+    g = 10
     overall_acc = []
     genre_acc = []
-    prob = np.zeros(24)
-    table = PrettyTable(["Genre", "Num of Same", "Num of Perfect Fifth", "Num of Relative Minor/Major",
-                         "Num of Parallel Minor/Major", "Accuracy", "Mirex Accuracy"])
+
+    table = PrettyTable(["Genre", "Same", "Perfect Fifth", "Relative Minor/Major",
+                         "Parallel Minor/Major", "Accuracy", "MIREX Accuracy"])
 
     for genre in test_genres:
         adir = os.path.join(audio_dir, genre)
@@ -40,11 +42,11 @@ if __name__ == '__main__':
                     continue
                 count += 1
                 data, sr = load(os.path.join(adir, f + audio_ext), sr=None)
-                chroma = chroma_stft(y=data, sr=sr, n_fft=4096, base_c=False, norm=None)
+                chroma = chroma_stft(y=data, sr=sr, n_fft=4096, base_c=False)
+                chroma = np.mean(chroma, axis=1)
                 chroma = np.log(1 + g * chroma)
-                chroma = np.sum(chroma, axis=1)
-                for i in range(24):
-                    prob[i] = pearsonr(chroma, template[i])[0]
+
+                prob = np.apply_along_axis(pearsonr, 1, template, chroma)[:, 0]
                 y = np.argmax(prob)
 
                 acc.append(mirex_evaluate(y, t))

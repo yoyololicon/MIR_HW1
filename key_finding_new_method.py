@@ -8,8 +8,8 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 
-blues_major_template = np.array([[1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0]])/np.sqrt(6)
-blues_minor_template = np.array([[1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0]])/np.sqrt(6)
+blues_major_template = np.array([[1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0]]) / np.sqrt(6)
+blues_minor_template = np.array([[1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0]]) / np.sqrt(6)
 for i in range(12):
     template = np.append(template, np.roll(blues_major_template, i), axis=0)
 for i in range(12):
@@ -19,9 +19,9 @@ if __name__ == '__main__':
     g = 1000
     overall_acc = []
     genre_acc = []
-    prob = np.zeros(48)
-    table = PrettyTable(["Genre", "Num of Same", "Num of Perfect Fifth", "Num of Relative Minor/Major",
-                         "Num of Parallel Minor/Major", "Accuracy", "Mirex Accuracy"])
+
+    table = PrettyTable(["Genre", "Same", "Perfect Fifth", "Relative Minor/Major",
+                         "Parallel Minor/Major", "Accuracy", "MIREX Accuracy"])
     for genre in test_genres:
         adir = os.path.join(audio_dir, genre)
         ldir = os.path.join(label_dir, genre)
@@ -37,11 +37,11 @@ if __name__ == '__main__':
                     continue
                 count += 1
                 data, sr = load(os.path.join(adir, f + audio_ext), sr=None)
-                chroma = chroma_stft(y=data, sr=sr, n_fft=4096, base_c=False, norm=None)
+                chroma = chroma_stft(y=data, sr=sr, n_fft=4096, base_c=False)
+                chroma = np.mean(chroma, axis=1)
                 chroma = np.log(1 + g * chroma)
-                chroma = np.sum(chroma, axis=1)
-                for i in range(48):
-                    prob[i] = pearsonr(chroma, template[i])[0]
+
+                prob = np.apply_along_axis(pearsonr, 1, template, chroma)[:, 0]
                 weight = np.tile(chroma, 4)
                 y = np.argmax(prob * weight) % 24
 
