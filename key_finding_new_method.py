@@ -1,24 +1,17 @@
 from librosa import load
 from librosa.feature import chroma_stft
-from key_finding_baseline import audio_dir, audio_ext, label_dir, label_ext, test_genres, mirex_evaluate
-from ks_key_finding import template
+from utils import audio_dir, audio_ext, label_dir, label_ext, test_genres, mirex_evaluate, ks_template, blues_template
 from scipy.stats import pearsonr
 from prettytable import PrettyTable
 import numpy as np
 import os
 import matplotlib.pyplot as plt
 
-blues_major_template = np.array([[1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0]]) / np.sqrt(6)
-blues_minor_template = np.array([[1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0]]) / np.sqrt(6)
-for i in range(12):
-    template = np.append(template, np.roll(blues_major_template, i), axis=0)
-for i in range(12):
-    template = np.append(template, np.roll(blues_minor_template, i), axis=0)
-
 if __name__ == '__main__':
-    g = 1000
+    g = 100
     overall_acc = []
     genre_acc = []
+    template = np.row_stack((ks_template, blues_template))
 
     table = PrettyTable(["Genre", "Same", "Perfect Fifth", "Relative Minor/Major",
                          "Parallel Minor/Major", "Accuracy", "MIREX Accuracy"])
