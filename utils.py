@@ -71,3 +71,6 @@ key2 += tmp
 for k, i in zip(key2, range(24)):
     if k not in inv_key_map:
         inv_key_map[k] = i
+
+def last_5chars(x):
+    return(x[-5:])

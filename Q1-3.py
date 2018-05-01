@@ -5,10 +5,10 @@ from prettytable import PrettyTable
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-from utils import test_genres, audio_dir, label_dir, label_ext, audio_ext, bin_template, mirex_evaluate
+from utils import test_genres, audio_dir, label_dir, label_ext, audio_ext, bin_template, mirex_evaluate, last_5chars
 
 if __name__ == '__main__':
-    g = 100
+    g = 1000
     overall_acc = []
     genre_acc = []
 
@@ -19,6 +19,7 @@ if __name__ == '__main__':
         adir = os.path.join(audio_dir, genre)
         ldir = os.path.join(label_dir, genre)
         file_names = [".".join(f.split(".")[:-1]) for f in os.listdir(adir)]
+        file_names = sorted(file_names, key=last_5chars)
 
         acc = []
         count = 0
@@ -45,6 +46,7 @@ if __name__ == '__main__':
                     y = tonic + 12
 
                 acc.append(mirex_evaluate(y, t))
+                print(f + "\t" + str(y))
 
         table.add_row([genre, acc.count(1), acc.count(0.5), acc.count(0.3), acc.count(0.2),
                        format(acc.count(1) / count, '.6f'),

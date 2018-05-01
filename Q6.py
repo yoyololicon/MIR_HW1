@@ -2,17 +2,19 @@ from librosa import load
 from librosa.feature import chroma_stft
 from utils import mirex_evaluate, ks_template, inv_key_map
 from scipy.stats import pearsonr
-from scipy.signal import medfilt, decimate, fftconvolve
-from prettytable import PrettyTable
+from scipy.signal import medfilt, fftconvolve
 import numpy as np
 import os
-import matplotlib.pyplot as plt
 
 data_dir = '/media/ycy/86A4D88BA4D87F5D/DataSet/BPS_piano'
 ref_prefix = 'REF_key_'
+predict_dir = 'predict_results/'
+
+key_map = {v: k for k, v in inv_key_map.items()}
 
 if __name__ == '__main__':
     file_names = [".".join(f.split(".")[:-1]) for f in os.listdir(data_dir) if f[-4:] == '.wav']
+    file_names.sort(key=float)
 
     d = 10
     g = 100
@@ -22,6 +24,7 @@ if __name__ == '__main__':
     overall_acc = []
 
     sym2num = np.vectorize(inv_key_map.get)
+    num2sym = np.vectorize(key_map.get, otypes=[np.str])
     evaluate_vec = np.vectorize(mirex_evaluate, otypes=[float])
 
     for f in file_names:
@@ -56,5 +59,9 @@ if __name__ == '__main__':
 
         print(f + '.wav', format(acc.count(1) / len(acc), '.6f'), format(np.mean(acc), '.6f'))
         overall_acc += acc
+
+        y_inv = num2sym(y)
+        np.savetxt(os.path.join(predict_dir, 'PRED_key_' + f + '.txt'), np.column_stack((np.arange(len(y)), y_inv)),
+                   delimiter='\t', fmt='%s')
 
     print(format(overall_acc.count(1) / len(overall_acc), '.6f'), format(np.mean(overall_acc), '.6f'))
