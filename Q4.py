@@ -1,6 +1,6 @@
 from librosa import load
 from librosa.feature import chroma_stft
-from utils import audio_dir, audio_ext, label_dir, label_ext, test_genres, mirex_evaluate, ks_template
+from utils import audio_dir, audio_ext, label_dir, label_ext, test_genres, mirex_evaluate, ks_template, last_5chars
 from scipy.stats import pearsonr
 from prettytable import PrettyTable
 import numpy as np
@@ -20,6 +20,7 @@ if __name__ == '__main__':
         adir = os.path.join(audio_dir, genre)
         ldir = os.path.join(label_dir, genre)
         file_names = [".".join(f.split(".")[:-1]) for f in os.listdir(adir)]
+        file_names = sorted(file_names, key=last_5chars)
 
         acc = []
         count = 0
@@ -40,6 +41,7 @@ if __name__ == '__main__':
                 y = np.argmax(prob)
 
                 acc.append(mirex_evaluate(y, t))
+                print(f + "\t" + str(y))
 
         table.add_row([genre, acc.count(1), acc.count(0.5), acc.count(0.3), acc.count(0.2),
                        format(acc.count(1) / count, '.6f'),

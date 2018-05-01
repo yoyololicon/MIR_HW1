@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from utils import test_genres, audio_dir, label_dir, label_ext, audio_ext, bin_template, mirex_evaluate, last_5chars
 
 if __name__ == '__main__':
-    g = 1000
+    g = 100
     overall_acc = []
     genre_acc = []
 
