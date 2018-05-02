@@ -28,6 +28,7 @@ bin_minor_template = np.array([[1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0]]) / np.sqrt(
 ```
 
 The program will output prediction of each song, genre raw accuracy and MIREX accuracy.
+The MIREX accuracy procedure is described [here](http://www.music-ir.org/mirex/wiki/2017:Audio_Key_Detection).
 
 ```
 +--------+------+---------------+----------------------+----------------------+----------+----------------+
@@ -69,7 +70,7 @@ ks_minor_template = np.array([[6.33, 2.68, 3.52, 5.38, 2.6, 3.53, 2.54, 4.75, 3.
 
 ### Q5: Blues+ key-finding
 
-This task actually ask the student to design a new algorithm to perform key finding, 
+This task actually ask students to design a new algorithm to perform key finding, 
 and I found that blues genre has the lowest score among the above method. 
 So I decided to add two extra blues major/minor template to the KS-profile method, 
 and the result outperform the previous method overall.
@@ -126,7 +127,4 @@ song    accuracy    mirex accuracy
 overall 0.488095 0.594645
 ```
 
-I also have tried to use CNN to solve the task, you can check out [here](ML_key_detect.ipynb).
-
-## Reference
-
+I also tried to use CNN to solve the task, you can check out [here](ML_key_detect.ipynb).
