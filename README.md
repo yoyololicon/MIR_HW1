@@ -45,7 +45,7 @@ The MIREX accuracy procedure is described [here](http://www.music-ir.org/mirex/w
 ![](images/g100_baseline.png)
 
 You can try to change the value _g_ in [Q1_3.py](Q1-3.py), which is the factor of logarithmic compression, 
-to see how it effect the result.
+to see how it affects the result.
 
 ### Q4: Krumhansl-Schmuckler key-finding algorithm
 
@@ -71,7 +71,7 @@ ks_minor_template = np.array([[6.33, 2.68, 3.52, 5.38, 2.6, 3.53, 2.54, 4.75, 3.
 ### Q5: Blues+ key-finding
 
 This task actually ask students to design a new algorithm to perform key finding, 
-and I found that blues genre has the lowest score among the above method. 
+and I found that blues has the lowest score among the above method. 
 So I decided to add two extra blues major/minor template to the KS-profile method, 
 and the result outperform the previous method overall.
 ```
@@ -93,7 +93,7 @@ blues_minor_template = np.array([[1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0]]) / np.sqr
 
 ### Q6: Local key detection
 
-Different from the above tast, we need to find the key at each time steps in the songs.
+Different from the above task, we need to find the key at each time steps in the songs.
 I use KS-profile matching Q4 and lots of average filtering(window size ~= 64s) on the chroma feature, 
 eventually reach almost 60% of MIREX accuracy.
 
@@ -127,4 +127,4 @@ song    accuracy    mirex accuracy
 overall 0.488095 0.594645
 ```
 
-I also tried to use CNN to solve the task, you can check out [here](ML_key_detect.ipynb).
+I also tried using CNN to solve the task, you can check out [here](ML_key_detect.ipynb).
